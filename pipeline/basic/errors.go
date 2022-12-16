@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"platform/logging"
 	"platform/pipeline"
-	"platform/services"
 )
 
 type ErrorComponent struct{}
@@ -16,10 +15,9 @@ func recoveryFunc(ctx *pipeline.ComponentContext, logger logging.Logger) {
 		ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 }
-func (c *ErrorComponent) Init() {}
-func (c *ErrorComponent) ProcessRequest(ctx *pipeline.ComponentContext, next func(*pipeline.ComponentContext)) {
-	var logger logging.Logger
-	services.GetServiceForContext(ctx.Context(), &logger)
+func (c *ErrorComponent) ImplementsProcessRequestWithServices() {}
+func (c *ErrorComponent) Init()                                 {}
+func (c *ErrorComponent) ProcessRequestWithServices(ctx *pipeline.ComponentContext, next func(*pipeline.ComponentContext), logger logging.Logger) {
 	defer recoveryFunc(ctx, logger)
 	next(ctx)
 	if ctx.GetError() != nil {
